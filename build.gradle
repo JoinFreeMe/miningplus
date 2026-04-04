@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.hytale.miningplus'
+version = '1.0.0-release-2026.03.26-89796e57b'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://maven.hytale.com/release' }
+}
+
+dependencies {
+    compileOnly 'com.hypixel.hytale:Server:2026.03.26-89796e57b'
+    compileOnly 'com.google.code.gson:gson:2.10.1'
+}
+
+jar {
+    archiveBaseName = 'MiningPlus'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes(
+            'Implementation-Title': 'MiningPlus',
+            'Implementation-Version': version
+        )
+    }
+}
+
+def localProps = new Properties()
+def localPropsFile = rootProject.file('local.properties')
+if (localPropsFile.exists()) localProps.load(localPropsFile.newInputStream())
+def serverDir = localProps.getProperty('hytale.serverDir', '')
+
+tasks.register('deployJar', Copy) {
+    dependsOn jar
+    from jar.archiveFile
+    into "${serverDir}/Server/mods"
+    doLast { println "Deployed ${jar.archiveFileName.get()} to ${serverDir}/Server/mods" }
+}

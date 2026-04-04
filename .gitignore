@@ -1,0 +1,28 @@
+# Build output
+build/
+out/
+
+# Gradle
+.gradle/
+gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local
+local.properties
+curseforge.md
+
+# Runtime data
+mods/MiningPlus/players/
+mods/MiningPlus/config.json

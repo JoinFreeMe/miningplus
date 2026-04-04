@@ -1,0 +1,18 @@
+{
+  "Group": "org.hytale.miningplus",
+  "Name": "MiningPlus",
+  "Version": "1.0.0",
+  "Description": "Allow different mining stregies with /miningplus or /m+",
+  "Authors": [
+    {
+      "Name": "RipZ"
+    }
+  ],
+  "Website": "https://discord.com/invite/aCE6HqfCHj",
+  "ServerVersion": "2026.03.26-89796e57b",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "IncludesAssetPack": true,
+  "DisabledByDefault": false,
+  "Main": "org.hytale.miningplus.MiningPlusPlugin"
+}
