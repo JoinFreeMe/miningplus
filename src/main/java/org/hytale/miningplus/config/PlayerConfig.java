@@ -22,6 +22,7 @@ public class PlayerConfig {
     private String pattern = "ORES_ONLY";
     private int maxBlocksPerAction = 64;
     private int maxSearchDepth = 32;
+    private boolean silkTouch = false;
 
     private transient Path configPath;
 
@@ -58,6 +59,7 @@ public class PlayerConfig {
     public String getActivationMode() { return activationMode; }
     public int getMaxBlocksPerAction() { return maxBlocksPerAction; }
     public int getMaxSearchDepth() { return maxSearchDepth; }
+    public boolean isSilkTouch() { return silkTouch; }
 
     /** Returns the player's selected excavation pattern, defaulting to ORES_ONLY if invalid. */
     public ExcavationPattern getPattern() {
@@ -94,6 +96,11 @@ public class PlayerConfig {
 
     public void setMaxSearchDepth(int value) {
         this.maxSearchDepth = value;
+        save();
+    }
+
+    public void setSilkTouch(boolean value) {
+        this.silkTouch = value;
         save();
     }
 }

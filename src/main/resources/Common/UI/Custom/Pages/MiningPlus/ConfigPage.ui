@@ -99,6 +99,17 @@ $C.@DecoratedContainer {
 
       Group {
         LayoutMode: Left;
+        Padding: (Left: 6, Bottom: 6);
+
+        TextButton #SilkTouchBtn {
+          Anchor: (Width: 200, Height: 28);
+          Style: $C.@DefaultTextButtonStyle;
+          Text: "Silk Touch: Not Configured";
+        }
+      }
+
+      Group {
+        LayoutMode: Left;
         Padding: (Left: 6, Bottom: 8);
 
         TextButton #PatFreeform {

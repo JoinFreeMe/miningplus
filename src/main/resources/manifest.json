@@ -1,7 +1,7 @@
 {
   "Group": "org.hytale.miningplus",
   "Name": "MiningPlus",
-  "Version": "1.1.0",
+  "Version": "1.2.0",
   "Description": "Allow different mining strategies with /miningplus or /m+",
   "Authors": [
     {

@@ -30,6 +30,7 @@ public class MiningPlusConfig {
     private int maxBlocksPerAction = 128;
     private int maxSearchDepth = 64;
     private List<String> excludedBlocks = List.of("bedrock", "rock_bedrock");
+    private boolean allowSilkTouch = false;
 
     private transient Path configPath;
     private transient Set<String> excludedBlockSet;
@@ -64,6 +65,7 @@ public class MiningPlusConfig {
         this.maxBlocksPerAction = fresh.maxBlocksPerAction;
         this.maxSearchDepth = fresh.maxSearchDepth;
         this.excludedBlocks = fresh.excludedBlocks;
+        this.allowSilkTouch = fresh.allowSilkTouch;
         rebuildExclusionSet();
     }
 
@@ -96,6 +98,17 @@ public class MiningPlusConfig {
     public boolean isBlockExcluded(String blockName) {
         if (excludedBlockSet == null || blockName == null) return false;
         return excludedBlockSet.contains(blockName.toLowerCase());
+    }
+
+    public boolean isAllowSilkTouch() { return allowSilkTouch; }
+
+    /** Returns true if the player has silk touch enabled and the server allows it. */
+    public boolean isSilkTouch(UUID playerId) {
+        return allowSilkTouch && getPlayerConfig(playerId).isSilkTouch();
+    }
+
+    public void setSilkTouch(UUID playerId, boolean value) {
+        getPlayerConfig(playerId).setSilkTouch(value);
     }
 
     // --- Per-player config access ---

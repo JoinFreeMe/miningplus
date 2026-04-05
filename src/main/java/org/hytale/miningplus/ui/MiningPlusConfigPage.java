@@ -52,12 +52,19 @@ public class MiningPlusConfigPage extends InteractiveCustomUIPage<MiningPlusConf
             default -> "None";
         };
 
+        boolean silkTouch = config.isSilkTouch(playerId);
+        boolean silkTouchAllowed = config.isAllowSilkTouch();
+
         // Status bar
         cmd.set("#ToggleBtn.Text", enabled ? "Disable" : "Enable");
         cmd.set("#StatusLine1.Text", "Status: " + (enabled ? "Enabled" : "Disabled"));
-        cmd.set("#StatusLine2.Text", "Mode: " + activePattern.getDisplayName()
+        String statusLine = "Mode: " + activePattern.getDisplayName()
                 + " | Key: " + activationLabel
-                + " | Max: " + maxBlocks + " | Depth: " + depth);
+                + " | Max: " + maxBlocks + " | Depth: " + depth;
+        if (silkTouchAllowed) {
+            statusLine += " | Silk: " + (silkTouch ? "On" : "Off");
+        }
+        cmd.set("#StatusLine2.Text", statusLine);
         cmd.set("#MaxBlocksLabel.Text", String.valueOf(maxBlocks));
         cmd.set("#DepthLabel.Text", String.valueOf(depth));
 
@@ -77,6 +84,15 @@ public class MiningPlusConfigPage extends InteractiveCustomUIPage<MiningPlusConf
         saveData.put("@ActivationKeyCrouch", "#ActivationKeyCrouch #CheckBox.Value");
         saveData.put("@ActivationKeyWalk", "#ActivationKeyWalk #CheckBox.Value");
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#SaveActivation", saveData);
+
+        // Silk touch
+        if (silkTouchAllowed) {
+            cmd.set("#SilkTouchBtn.Text", silkTouch ? "Silk Touch: ON" : "Silk Touch: OFF");
+            evt.addEventBinding(CustomUIEventBindingType.Activating, "#SilkTouchBtn",
+                    EventData.of("Action", "silkTouch"), false);
+        } else {
+            cmd.set("#SilkTouchBtn.Text", "Silk Touch: Not Configured");
+        }
 
         // Pattern buttons
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#PatFreeform",
@@ -119,6 +135,10 @@ public class MiningPlusConfigPage extends InteractiveCustomUIPage<MiningPlusConf
         switch (event.action) {
             case "toggle" -> {
                 config.togglePlayer(playerId);
+                rebuild();
+            }
+            case "silkTouch" -> {
+                config.setSilkTouch(playerId, !config.isSilkTouch(playerId));
                 rebuild();
             }
             case "saveActivation" -> {

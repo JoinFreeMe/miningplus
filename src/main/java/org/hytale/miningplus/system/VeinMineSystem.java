@@ -144,13 +144,14 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
 
             if (targets.isEmpty()) return;
 
+            boolean silkTouch = config.isSilkTouch(playerId);
             List<ItemStack> drops = new ArrayList<>();
 
             // Include drop for the origin block (game's own drop gets consumed)
-            drops.addAll(resolveDrops(blockType));
+            drops.addAll(resolveDrops(blockType, silkTouch));
 
             for (Vector3i pos : targets) {
-                drops.addAll(removeBlockAndResolveDrops(world, pos));
+                drops.addAll(removeBlockAndResolveDrops(world, pos, silkTouch));
             }
 
             Vector3d dropPos = new Vector3d(
@@ -176,7 +177,7 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
         return breaking != null ? breaking.getGatherType() : null;
     }
 
-    private List<ItemStack> removeBlockAndResolveDrops(World world, Vector3i pos) {
+    private List<ItemStack> removeBlockAndResolveDrops(World world, Vector3i pos, boolean silkTouch) {
         long chunkIndex = ChunkUtil.indexChunkFromBlock(pos.getX(), pos.getZ());
         WorldChunk chunk = world.getChunkIfLoaded(chunkIndex);
         if (chunk == null) return List.of();
@@ -196,26 +197,59 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
         BlockType airType = BlockType.getAssetMap().getAsset(airId);
         chunk.setBlock(localX, pos.getY(), localZ, airId, airType, 0, 0, 256);
 
-        return resolveDrops(blockType);
+        return resolveDrops(blockType, silkTouch);
     }
 
-    private static List<ItemStack> resolveDrops(BlockType blockType) {
-        BlockGathering gathering = blockType.getGathering();
-        if (gathering != null && gathering.getBreaking() != null) {
-            String dropListId = gathering.getBreaking().getDropListId();
-            if (dropListId != null) {
-                List<ItemStack> drops = ItemModule.get().getRandomItemDrops(dropListId);
-                if (!drops.isEmpty()) return drops;
-
-                if (dropListId.startsWith("*")) {
-                    drops = ItemModule.get().getRandomItemDrops(dropListId.substring(1));
-                    if (!drops.isEmpty()) return drops;
-                }
+    /**
+     * Resolves drops for a block using the same priority order as the game's BlockHarvestUtils:
+     * Physics -> Breaking -> Soft -> Harvest, checking both dropListId and itemId.
+     */
+    private static List<ItemStack> resolveDrops(BlockType blockType, boolean silkTouch) {
+        // Silk touch: drop the raw block, skip normal drop resolution
+        if (silkTouch) {
+            if (blockType.getItem() != null) {
+                return List.of(new ItemStack(blockType.getItem().getId(), 1));
             }
+            return List.of(new ItemStack(blockType.getId(), 1));
         }
 
-        if (blockType.getItem() != null) {
-            return List.of(new ItemStack(blockType.getItem().getId(), 1));
+        BlockGathering gathering = blockType.getGathering();
+        if (gathering != null) {
+            String itemId = null;
+            String dropListId = null;
+            int quantity = 1;
+
+            if (gathering.getPhysics() != null) {
+                itemId = gathering.getPhysics().getItemId();
+                dropListId = gathering.getPhysics().getDropListId();
+            } else if (gathering.getBreaking() != null) {
+                quantity = gathering.getBreaking().getQuantity();
+                itemId = gathering.getBreaking().getItemId();
+                dropListId = gathering.getBreaking().getDropListId();
+            } else if (gathering.getSoft() != null) {
+                itemId = gathering.getSoft().getItemId();
+                dropListId = gathering.getSoft().getDropListId();
+            } else if (gathering.getHarvest() != null) {
+                itemId = gathering.getHarvest().getItemId();
+                dropListId = gathering.getHarvest().getDropListId();
+            }
+
+            if (dropListId != null || itemId != null) {
+                List<ItemStack> drops = new ArrayList<>();
+
+                if (dropListId != null) {
+                    drops.addAll(ItemModule.get().getRandomItemDrops(dropListId));
+                    if (drops.isEmpty() && dropListId.startsWith("*")) {
+                        drops.addAll(ItemModule.get().getRandomItemDrops(dropListId.substring(1)));
+                    }
+                }
+
+                if (itemId != null) {
+                    drops.add(new ItemStack(itemId, quantity));
+                }
+
+                if (!drops.isEmpty()) return drops;
+            }
         }
 
         return List.of();

@@ -85,7 +85,7 @@ Requires Java 25 and access to the Hytale Maven repository.
 ./gradlew build
 ```
 
-The built JAR will be at `build/libs/MiningPlus-1.1.0.jar`.
+The built JAR will be at `build/libs/MiningPlus-1.2.0.jar`.
 
 ## License
 
