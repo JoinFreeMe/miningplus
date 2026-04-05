@@ -7,7 +7,10 @@ import org.hytale.miningplus.system.ExcavationPattern;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,10 +27,12 @@ public class MiningPlusConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private boolean enabled = true;
-    private int maxBlocksPerAction = 64;
-    private int maxSearchDepth = 32;
+    private int maxBlocksPerAction = 128;
+    private int maxSearchDepth = 64;
+    private List<String> excludedBlocks = List.of("bedrock", "rock_bedrock");
 
     private transient Path configPath;
+    private transient Set<String> excludedBlockSet;
     private transient Path playersDir;
     private transient Map<UUID, PlayerConfig> playerConfigs = new ConcurrentHashMap<>();
 
@@ -46,6 +51,7 @@ public class MiningPlusConfig {
         config.configPath = path;
         config.playersDir = path.getParent().resolve("players");
         config.playerConfigs = new ConcurrentHashMap<>();
+        config.rebuildExclusionSet();
         config.save();
         return config;
     }
@@ -57,6 +63,17 @@ public class MiningPlusConfig {
         this.enabled = fresh.enabled;
         this.maxBlocksPerAction = fresh.maxBlocksPerAction;
         this.maxSearchDepth = fresh.maxSearchDepth;
+        this.excludedBlocks = fresh.excludedBlocks;
+        rebuildExclusionSet();
+    }
+
+    private void rebuildExclusionSet() {
+        excludedBlockSet = new HashSet<>();
+        if (excludedBlocks != null) {
+            for (String name : excludedBlocks) {
+                excludedBlockSet.add(name.toLowerCase());
+            }
+        }
     }
 
     private void save() {
@@ -74,6 +91,12 @@ public class MiningPlusConfig {
     public boolean isEnabled() { return enabled; }
     public int getMaxBlocksPerAction() { return maxBlocksPerAction; }
     public int getMaxSearchDepth() { return maxSearchDepth; }
+
+    /** Checks whether a block name is on the server exclusion list. Case-insensitive. */
+    public boolean isBlockExcluded(String blockName) {
+        if (excludedBlockSet == null || blockName == null) return false;
+        return excludedBlockSet.contains(blockName.toLowerCase());
+    }
 
     // --- Per-player config access ---
 

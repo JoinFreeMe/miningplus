@@ -106,6 +106,14 @@ $C.@DecoratedContainer {
           Style: $C.@DefaultTextButtonStyle;
           Text: "Ores Only";
         }
+
+        Group { Anchor: (Width: 8); }
+
+        TextButton #PatTargeted {
+          Anchor: (Width: 150, Height: 28);
+          Style: $C.@DefaultTextButtonStyle;
+          Text: "Targeted Block";
+        }
       }
 
       // --- Separator ---
@@ -206,6 +214,8 @@ $C.@DecoratedContainer {
         TextButton #MaxBlocks64 { Anchor: (Width: 70, Height: 28); Style: $C.@DefaultTextButtonStyle; Text: "64"; }
         Group { Anchor: (Width: 8); }
         TextButton #MaxBlocks128 { Anchor: (Width: 70, Height: 28); Style: $C.@DefaultTextButtonStyle; Text: "128"; }
+        Group { Anchor: (Width: 8); }
+        TextButton #MaxBlocksMax { Anchor: (Width: 70, Height: 28); Style: $C.@DefaultTextButtonStyle; Text: "MAX"; }
       }
 
       // --- Separator ---
@@ -240,6 +250,8 @@ $C.@DecoratedContainer {
         TextButton #Depth32 { Anchor: (Width: 70, Height: 28); Style: $C.@DefaultTextButtonStyle; Text: "32"; }
         Group { Anchor: (Width: 8); }
         TextButton #Depth64 { Anchor: (Width: 70, Height: 28); Style: $C.@DefaultTextButtonStyle; Text: "64"; }
+        Group { Anchor: (Width: 8); }
+        TextButton #DepthMax { Anchor: (Width: 70, Height: 28); Style: $C.@DefaultTextButtonStyle; Text: "MAX"; }
       }
 
     }

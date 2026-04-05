@@ -39,8 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Listens for {@link BreakBlockEvent} and, depending on the active excavation pattern,
- * either vein-mines connected ores or breaks blocks in a fixed shape.
- * Drops are collected and spawned at the position of the originally mined block.
+ * either vein-mines connected ores, vein-mines matching blocks, or breaks blocks in a
+ * fixed shape. Drops are collected and spawned at the position of the originally mined block.
  */
 public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEvent> {
 
@@ -102,10 +102,16 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
             Vector3i origin = event.getTargetBlock();
             if (blockType == null || origin == null) return;
 
+            // Check if the mined block is excluded
+            String blockName = blockType.getId();
+            if (config.isBlockExcluded(blockName)) return;
+
             World world = store.getExternalData().getWorld();
             if (world == null) return;
 
             ExcavationPattern pattern = config.getPattern(playerId);
+            int maxBlocks = config.getMaxBlocksPerAction(playerId);
+            int maxDepth = config.getMaxSearchDepth(playerId);
             List<Vector3i> targets;
 
             if (pattern == ExcavationPattern.ORES_ONLY) {
@@ -113,23 +119,27 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
                 String gatherType = getGatherType(blockType);
                 if (gatherType == null || !gatherType.startsWith(ORE_PREFIX)) return;
 
-                targets = FloodFill.search(
-                        world, origin,
-                        candidate -> gatherType.equals(getGatherType(candidate)),
-                        config.getMaxBlocksPerAction(playerId),
-                        config.getMaxSearchDepth(playerId));
+                targets = FloodFill.search(world, origin,
+                        candidate -> !config.isBlockExcluded(candidate.getId())
+                                && gatherType.equals(getGatherType(candidate)),
+                        maxBlocks, maxDepth);
+
+            } else if (pattern == ExcavationPattern.TARGETED) {
+                // Targeted: vein-mine any matching block type
+                String targetName = blockType.getId();
+
+                targets = FloodFill.search(world, origin,
+                        candidate -> !config.isBlockExcluded(candidate.getId())
+                                && targetName.equals(candidate.getId()),
+                        maxBlocks, maxDepth);
+
             } else {
                 // Shape-based excavation: works on any block
                 TransformComponent transform = store.getComponent(ref, TransformComponent.getComponentType());
                 if (transform == null) return;
 
                 Vector3d playerPos = transform.getPosition();
-                targets = pattern.getPositions(origin, playerPos, config.getMaxSearchDepth(playerId));
-
-                // Cap to max blocks
-                if (targets.size() > config.getMaxBlocksPerAction(playerId)) {
-                    targets = targets.subList(0, config.getMaxBlocksPerAction(playerId));
-                }
+                targets = pattern.getPositions(origin, playerPos, maxDepth, maxBlocks);
             }
 
             if (targets.isEmpty()) return;
@@ -178,6 +188,9 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
 
         BlockType blockType = BlockType.getAssetMap().getAsset(blockId);
         if (blockType == null) return List.of();
+
+        // Skip excluded blocks in shape patterns
+        if (config.isBlockExcluded(blockType.getId())) return List.of();
 
         int airId = BlockType.getAssetMap().getIndex("Empty");
         BlockType airType = BlockType.getAssetMap().getAsset(airId);

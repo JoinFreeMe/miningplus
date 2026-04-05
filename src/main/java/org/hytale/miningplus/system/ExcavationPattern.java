@@ -15,6 +15,9 @@ public enum ExcavationPattern {
     /** Connected ore flood fill (default vein mining behaviour). */
     ORES_ONLY("Ores Only"),
 
+    /** Connected block flood fill - matches the exact block type mined. */
+    TARGETED("Targeted Block"),
+
     /** Single block tunnel extending away from the player. */
     TUNNEL_1x1("Tunnel 1x1"),
 
@@ -43,21 +46,33 @@ public enum ExcavationPattern {
     /**
      * Generates the list of block positions this pattern would break,
      * excluding the origin block itself.
+     * Depth is automatically capped so the total block count stays within maxBlocks.
      *
      * @param origin    the block the player mined
      * @param playerPos the player's position (used to determine facing direction)
      * @param depth     how many blocks deep tunnels extend
+     * @param maxBlocks the maximum number of blocks that can be broken
      * @return positions to break (does NOT include origin)
      */
-    public List<Vector3i> getPositions(Vector3i origin, Vector3d playerPos, int depth) {
+    public List<Vector3i> getPositions(Vector3i origin, Vector3d playerPos, int depth, int maxBlocks) {
         return switch (this) {
             case ORES_ONLY -> List.of(); // handled separately by FloodFill
-            case TUNNEL_1x1 -> centeredTunnel(origin, playerPos, 1, 1, depth);
-            case TUNNEL_2x1 -> bottomUpTunnel(origin, playerPos, 1, 2, depth);
-            case TUNNEL_3x3 -> centeredTunnel(origin, playerPos, 3, 3, depth);
-            case CUBE_3x3x3 -> centeredTunnel(origin, playerPos, 3, 3, 3);
-            case CUBE_5x5x5 -> centeredTunnel(origin, playerPos, 5, 5, 5);
+            case TARGETED -> List.of(); // handled separately by FloodFill
+            case TUNNEL_1x1 -> centeredTunnel(origin, playerPos, 1, 1, capDepth(depth, 1, maxBlocks));
+            case TUNNEL_2x1 -> bottomUpTunnel(origin, playerPos, 1, 2, capDepth(depth, 2, maxBlocks));
+            case TUNNEL_3x3 -> centeredTunnel(origin, playerPos, 3, 3, capDepth(depth, 9, maxBlocks));
+            case CUBE_3x3x3 -> centeredTunnel(origin, playerPos, 3, 3, capDepth(3, 9, maxBlocks));
+            case CUBE_5x5x5 -> centeredTunnel(origin, playerPos, 5, 5, capDepth(5, 25, maxBlocks));
         };
+    }
+
+    /**
+     * Caps the depth so that (depth * crossSection) does not exceed maxBlocks.
+     * Ensures at least 1 block deep if any blocks are available.
+     */
+    private static int capDepth(int depth, int crossSection, int maxBlocks) {
+        int maxDepth = Math.max(1, maxBlocks / crossSection);
+        return Math.min(depth, maxDepth);
     }
 
     /**

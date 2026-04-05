@@ -7,12 +7,15 @@ Break one ore - mine the entire vein. Dig tunnels with a single swing. Mining+ g
 ## Features
 
 - **Vein Mining** - Mine one ore and all connected ores of the same type break automatically. Uses 26-directional adjacency so diagonal ores are included.
+- **Targeted Block Mining** - Vein-mine any block type, not just ores. Break one stone block and all connected stone breaks with it.
 - **Tunnel Patterns** - Dig 1x1, 2x1 (player height), or 3x3 tunnels in the direction you're facing.
 - **Area Patterns** - Break 3x3x3 or 5x5x5 cubes into the wall from the face you mine.
 - **In-Game Config UI** - Open with `/mining+`. No items needed.
 - **Activation Keys** - Always active, or require Crouch (Ctrl) / Walk (Alt) to be held.
 - **Per-Player Settings** - Each player's preferences are saved to disk and persist across restarts.
-- **Server Limits** - Admins set max blocks and search depth in `config.json`. Player values are capped at the server maximum.
+- **Server Limits** - Admins set max blocks, search depth, and excluded blocks in `config.json`. Player values are capped at the server maximum.
+- **Block Exclusion** - Server admins can prevent specific blocks from being mined (bedrock excluded by default).
+- **Smart Depth Capping** - Tunnel depth auto-adjusts based on max blocks and pattern size so you never get weird partial tunnels.
 - **Proper Drops** - All mined blocks drop their correct items using the game's drop tables.
 
 ## Installation
@@ -27,6 +30,8 @@ Break one ore - mine the entire vein. Dig tunnels with a single swing. Mining+ g
 |---------|-------------|
 | `/mining+` | Open the config UI |
 
+Aliases: `/m+`, `/miningplus`
+
 ## Configuration
 
 ### Server Config (`mods/MiningPlus/config.json`)
@@ -34,12 +39,15 @@ Break one ore - mine the entire vein. Dig tunnels with a single swing. Mining+ g
 ```json
 {
   "enabled": true,
-  "maxBlocksPerAction": 64,
-  "maxSearchDepth": 32
+  "maxBlocksPerAction": 128,
+  "maxSearchDepth": 64,
+  "excludedBlocks": ["bedrock", "rock_bedrock"]
 }
 ```
 
-These values are the server-wide maximums. Players can set their own values up to these limits.
+These values are the server-wide maximums. Players can set their own values up to these limits via the in-game UI.
+
+The `excludedBlocks` list prevents specific blocks from being broken by any mining pattern. Block names are case-insensitive.
 
 ### Player Config (`mods/MiningPlus/players/{uuid}.json`)
 
@@ -60,6 +68,7 @@ Created automatically when a player first opens the config UI. Stores their pers
 | Pattern | Description |
 |---------|-------------|
 | Ores Only | Flood-fill connected ores of the same type |
+| Targeted Block | Flood-fill any connected blocks matching the mined type |
 | Tunnel 1x1 | Single-block tunnel |
 | Tunnel 2x1 | Player-height tunnel (2 high, 1 wide) |
 | Tunnel 3x3 | Full 3x3 tunnel, centered on mined block |
@@ -76,7 +85,7 @@ Requires Java 25 and access to the Hytale Maven repository.
 ./gradlew build
 ```
 
-The built JAR will be at `build/libs/MiningPlus-1.0.0.jar`.
+The built JAR will be at `build/libs/MiningPlus-1.1.0.jar`.
 
 ## License
 

@@ -81,6 +81,8 @@ public class MiningPlusConfigPage extends InteractiveCustomUIPage<MiningPlusConf
         // Pattern buttons
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#PatFreeform",
                 EventData.of("Action", "pattern").append("Value", "ORES_ONLY"), false);
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#PatTargeted",
+                EventData.of("Action", "pattern").append("Value", "TARGETED"), false);
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#PatTunnel1x1",
                 EventData.of("Action", "pattern").append("Value", "TUNNEL_1x1"), false);
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#PatTunnel2x1",
@@ -97,12 +99,16 @@ public class MiningPlusConfigPage extends InteractiveCustomUIPage<MiningPlusConf
             evt.addEventBinding(CustomUIEventBindingType.Activating, "#MaxBlocks" + n,
                     EventData.of("Action", "maxBlocks").append("Value", String.valueOf(n)), false);
         }
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#MaxBlocksMax",
+                EventData.of("Action", "maxBlocks").append("Value", "max"), false);
 
         // Depth
         for (int n : new int[]{8, 16, 32, 64}) {
             evt.addEventBinding(CustomUIEventBindingType.Activating, "#Depth" + n,
                     EventData.of("Action", "depth").append("Value", String.valueOf(n)), false);
         }
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#DepthMax",
+                EventData.of("Action", "depth").append("Value", "max"), false);
     }
 
     @Override
@@ -137,13 +143,19 @@ public class MiningPlusConfigPage extends InteractiveCustomUIPage<MiningPlusConf
             }
             case "maxBlocks" -> {
                 if (event.value != null) {
-                    config.setMaxBlocksPerAction(playerId, Integer.parseInt(event.value));
+                    int value = "max".equals(event.value)
+                            ? config.getMaxBlocksPerAction()
+                            : Integer.parseInt(event.value);
+                    config.setMaxBlocksPerAction(playerId, value);
                     rebuild();
                 }
             }
             case "depth" -> {
                 if (event.value != null) {
-                    config.setMaxSearchDepth(playerId, Integer.parseInt(event.value));
+                    int value = "max".equals(event.value)
+                            ? config.getMaxSearchDepth()
+                            : Integer.parseInt(event.value);
+                    config.setMaxSearchDepth(playerId, value);
                     rebuild();
                 }
             }
