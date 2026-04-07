@@ -144,6 +144,12 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
 
             if (targets.isEmpty()) return;
 
+            // Sort top-down for physics blocks (sand, gravel) to prevent
+            // cascading support loss from eating blocks before we handle them
+            if (blockType.hasSupport()) {
+                targets.sort((a, b) -> Integer.compare(b.getY(), a.getY()));
+            }
+
             boolean silkTouch = config.isSilkTouch(playerId);
             List<ItemStack> drops = new ArrayList<>();
 
