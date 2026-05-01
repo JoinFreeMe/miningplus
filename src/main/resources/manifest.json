@@ -1,7 +1,7 @@
 {
   "Group": "org.hytale.miningplus",
   "Name": "MiningPlus",
-  "Version": "1.2.1",
+  "Version": "1.2.3",
   "Description": "Allow different mining strategies with /miningplus or /m+",
   "Authors": [
     {
@@ -9,10 +9,10 @@
     }
   ],
   "Website": "https://discord.com/invite/aCE6HqfCHj",
-  "ServerVersion": "2026.03.26-89796e57b",
+  "ServerVersion": "2026.04.30-b4f6a911e",
   "Dependencies": {},
   "OptionalDependencies": {},
-  "IncludesAssetPack": true,
+  "IncludesAssetPack": false,
   "DisabledByDefault": false,
   "Main": "org.hytale.miningplus.MiningPlusPlugin"
 }

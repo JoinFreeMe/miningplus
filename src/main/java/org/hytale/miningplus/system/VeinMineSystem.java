@@ -10,9 +10,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
-import com.hypixel.hytale.math.vector.Vector3i;
+import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.protocol.MovementStates;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockBreakingDropType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockGathering;
@@ -28,6 +26,8 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.hytale.miningplus.config.MiningPlusConfig;
+import org.joml.Vector3d;
+import org.joml.Vector3i;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -147,7 +147,7 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
             // Sort top-down for physics blocks (sand, gravel) to prevent
             // cascading support loss from eating blocks before we handle them
             if (blockType.hasSupport()) {
-                targets.sort((a, b) -> Integer.compare(b.getY(), a.getY()));
+                targets.sort((a, b) -> Integer.compare(b.y, a.y));
             }
 
             boolean silkTouch = config.isSilkTouch(playerId);
@@ -161,11 +161,11 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
             }
 
             Vector3d dropPos = new Vector3d(
-                    origin.getX() + 0.5, origin.getY() + 0.5, origin.getZ() + 0.5);
+                    origin.x + 0.5, origin.y + 0.5, origin.z + 0.5);
 
             for (ItemStack item : drops) {
                 Holder<EntityStore> entity = ItemComponent.generateItemDrop(
-                        store, item, dropPos, new Vector3f(0, 0, 0), 0.0F, 0.2F, 0.0F);
+                        store, item, dropPos, Rotation3f.ZERO, 0.0F, 0.2F, 0.0F);
                 if (entity != null) {
                     commandBuffer.addEntity(entity, AddReason.SPAWN);
                 }
@@ -184,13 +184,13 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
     }
 
     private List<ItemStack> removeBlockAndResolveDrops(World world, Vector3i pos, boolean silkTouch) {
-        long chunkIndex = ChunkUtil.indexChunkFromBlock(pos.getX(), pos.getZ());
+        long chunkIndex = ChunkUtil.indexChunkFromBlock(pos.x, pos.z);
         WorldChunk chunk = world.getChunkIfLoaded(chunkIndex);
         if (chunk == null) return List.of();
 
-        int localX = pos.getX() & ChunkUtil.SIZE_MASK;
-        int localZ = pos.getZ() & ChunkUtil.SIZE_MASK;
-        int blockId = chunk.getBlock(localX, pos.getY(), localZ);
+        int localX = pos.x & ChunkUtil.SIZE_MASK;
+        int localZ = pos.z & ChunkUtil.SIZE_MASK;
+        int blockId = chunk.getBlock(localX, pos.y, localZ);
         if (blockId == 0) return List.of();
 
         BlockType blockType = BlockType.getAssetMap().getAsset(blockId);
@@ -201,7 +201,7 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
 
         int airId = BlockType.getAssetMap().getIndex("Empty");
         BlockType airType = BlockType.getAssetMap().getAsset(airId);
-        chunk.setBlock(localX, pos.getY(), localZ, airId, airType, 0, 0, 256);
+        chunk.setBlock(localX, pos.y, localZ, airId, airType, 0, 0, 256);
 
         return resolveDrops(blockType, silkTouch);
     }

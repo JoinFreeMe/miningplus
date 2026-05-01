@@ -1,7 +1,7 @@
 package org.hytale.miningplus.system;
 
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
@@ -51,7 +51,7 @@ public final class FloodFill {
         Set<Long> visited = new HashSet<>();
         Queue<long[]> queue = new LinkedList<>();
 
-        int sx = start.getX(), sy = start.getY(), sz = start.getZ();
+        int sx = start.x, sy = start.y, sz = start.z;
         long startPacked = packPos(sx, sy, sz);
         visited.add(startPacked);
         queue.add(new long[]{startPacked, 0});

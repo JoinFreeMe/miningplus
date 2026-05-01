@@ -1,7 +1,7 @@
 package org.hytale.miningplus.system;
 
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3d;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,9 +81,9 @@ public enum ExcavationPattern {
      * away from the player (into the wall).
      */
     static int[] getFaceDirection(Vector3i block, Vector3d playerPos) {
-        double dx = playerPos.getX() - (block.getX() + 0.5);
-        double dy = playerPos.getY() - (block.getY() + 0.5);
-        double dz = playerPos.getZ() - (block.getZ() + 0.5);
+        double dx = playerPos.x - (block.x + 0.5);
+        double dy = playerPos.y - (block.y + 0.5);
+        double dz = playerPos.z - (block.z + 0.5);
 
         double ax = Math.abs(dx);
         double ay = Math.abs(dy);
@@ -125,7 +125,7 @@ public enum ExcavationPattern {
 
         int halfW = (width - 1) / 2;
         int halfH = (height - 1) / 2;
-        int ox = origin.getX(), oy = origin.getY(), oz = origin.getZ();
+        int ox = origin.x, oy = origin.y, oz = origin.z;
 
         for (int d = 0; d < depth; d++) {
             for (int w = -halfW; w <= halfW; w++) {
@@ -157,7 +157,7 @@ public enum ExcavationPattern {
         List<Vector3i> positions = new ArrayList<>();
 
         int halfW = (width - 1) / 2;
-        int ox = origin.getX(), oy = origin.getY(), oz = origin.getZ();
+        int ox = origin.x, oy = origin.y, oz = origin.z;
 
         for (int d = 0; d < depth; d++) {
             for (int w = -halfW; w <= halfW; w++) {
