@@ -9,7 +9,7 @@
     }
   ],
   "Website": "https://discord.com/invite/aCE6HqfCHj",
-  "ServerVersion": "2026.04.30-b4f6a911e",
+  "ServerVersion": ">=0.5.0-pre.9.1 <0.6.0",
   "Dependencies": {},
   "OptionalDependencies": {},
   "IncludesAssetPack": false,

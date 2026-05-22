@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'org.hytale.miningplus'
-version = '1.2.3-pre-release-2026.04.30-b4f6a911e'
+version = '1.2.3-pre-release-0.5.0-pre.9.1'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.hypixel.hytale:Server:2026.04.30-b4f6a911e'
+    compileOnly 'com.hypixel.hytale:Server:0.5.0-pre.9.1'
     compileOnly 'com.google.code.gson:gson:2.10.1'
 }
 
