@@ -23,12 +23,8 @@ public class MiningPlusCommands extends AbstractPlayerCommand {
     public MiningPlusCommands(MiningPlusConfig config) {
         super("mining+", "Open the Mining+ configuration panel.");
         this.addAliases("m+", "miningplus");
+        this.requireNoPermission();
         this.config = config;
-    }
-
-    @Override
-    protected boolean canGeneratePermission() {
-        return false;
     }
 
     @Override
