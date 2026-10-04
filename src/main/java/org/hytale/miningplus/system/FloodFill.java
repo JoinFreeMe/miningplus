@@ -1,10 +1,11 @@
 package org.hytale.miningplus.system;
 
-import com.hypixel.hytale.math.util.ChunkUtil;
+import com.hypixel.hytale.component.Ref;
 import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -82,13 +83,13 @@ public final class FloodFill {
                 if (visited.contains(neighborPacked)) continue;
                 visited.add(neighborPacked);
 
-                long chunkIndex = ChunkUtil.indexChunkFromBlock(nx, nz);
-                WorldChunk chunk = world.getChunkIfLoaded(chunkIndex);
-                if (chunk == null) continue;
+                ChunkStore chunkStore = world.getChunkStore();
+                Ref<ChunkStore> sectionRef = chunkStore.getChunkSectionReferenceAtBlock(nx, ny, nz);
+                if (sectionRef == null || !sectionRef.isValid()) continue;
+                BlockSection section = chunkStore.getStore().getComponent(sectionRef, BlockSection.getComponentType());
+                if (section == null) continue;
 
-                int localX = nx & ChunkUtil.SIZE_MASK;
-                int localZ = nz & ChunkUtil.SIZE_MASK;
-                int blockId = chunk.getBlock(localX, ny, localZ);
+                int blockId = section.get(nx, ny, nz);
                 if (blockId == 0) continue;
 
                 BlockType blockType = BlockType.getAssetMap().getAsset(blockId);
