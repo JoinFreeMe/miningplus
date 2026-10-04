@@ -9,7 +9,6 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
-import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.protocol.MovementStates;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockBreakingDropType;
@@ -23,7 +22,9 @@ import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
 import com.hypixel.hytale.server.core.modules.item.ItemModule;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.BlockOperations;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.hytale.miningplus.config.MiningPlusConfig;
 import org.joml.Vector3d;
@@ -184,13 +185,13 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
     }
 
     private List<ItemStack> removeBlockAndResolveDrops(World world, Vector3i pos, boolean silkTouch) {
-        long chunkIndex = ChunkUtil.indexChunkFromBlock(pos.x, pos.z);
-        WorldChunk chunk = world.getChunkIfLoaded(chunkIndex);
-        if (chunk == null) return List.of();
+        ChunkStore chunkStore = world.getChunkStore();
+        Ref<ChunkStore> sectionRef = chunkStore.getChunkSectionReferenceAtBlock(pos.x, pos.y, pos.z);
+        if (sectionRef == null || !sectionRef.isValid()) return List.of();
+        BlockSection section = chunkStore.getStore().getComponent(sectionRef, BlockSection.getComponentType());
+        if (section == null) return List.of();
 
-        int localX = pos.x & ChunkUtil.SIZE_MASK;
-        int localZ = pos.z & ChunkUtil.SIZE_MASK;
-        int blockId = chunk.getBlock(localX, pos.y, localZ);
+        int blockId = section.get(pos.x, pos.y, pos.z);
         if (blockId == 0) return List.of();
 
         BlockType blockType = BlockType.getAssetMap().getAsset(blockId);
@@ -201,7 +202,7 @@ public class VeinMineSystem extends EntityEventSystem<EntityStore, BreakBlockEve
 
         int airId = BlockType.getAssetMap().getIndex("Empty");
         BlockType airType = BlockType.getAssetMap().getAsset(airId);
-        chunk.setBlock(localX, pos.y, localZ, airId, airType, 0, 0, 256);
+        BlockOperations.setBlock(chunkStore, sectionRef, pos.x, pos.y, pos.z, airId, airType, 0, 0, 256);
 
         return resolveDrops(blockType, silkTouch);
     }
